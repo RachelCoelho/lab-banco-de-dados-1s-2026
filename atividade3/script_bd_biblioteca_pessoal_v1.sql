@@ -55,10 +55,7 @@ CREATE TABLE Livro (
     ano_publicacao YEAR,
     lido BOOLEAN DEFAULT(0),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-/* Informações */
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
 /* Restrição: Ao deletar usuário, deleta os livros (Cascade) */
     CONSTRAINT fk_livro_usuario FOREIGN KEY (id_usuario) 
@@ -73,3 +70,5 @@ CREATE TABLE Livro (
         
     CONSTRAINT fk_livro_categoria FOREIGN KEY (id_categoria) 
     REFERENCES Categoria(id_categoria) ON DELETE RESTRICT
+
+    );
