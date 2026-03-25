@@ -72,4 +72,4 @@ CREATE TABLE Livro (
     REFERENCES Editora(id_editora) ON DELETE RESTRICT,
         
     CONSTRAINT fk_livro_categoria FOREIGN KEY (id_categoria) 
-    REFERENCES Categoria(id_category) ON DELETE RESTRICT
+    REFERENCES Categoria(id_categoria) ON DELETE RESTRICT
