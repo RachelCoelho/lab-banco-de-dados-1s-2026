@@ -14,7 +14,7 @@ CREATE TABLE Usuario (
 
 /* Tabela Categoria */
 CREATE TABLE Categoria (
-    id_category INT AUTO_INCREMENT PRIMARY KEY,
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(128) NOT NULL UNIQUE,
     descricao TEXT,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
