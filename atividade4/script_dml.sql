@@ -81,7 +81,7 @@ INSERT INTO livro (id_usuario, id_autor, id_editora, id_categoria, titulo, ano_p
 (3,4,3,4,'Helena',1876,0),
 (3,3,1,3,'Mansfield Park',1814,1);
 
-/* QUERIES REQUISITADAS */
+/* QUERIES */
 
 /* Query que retorna todos os livros da autora JK Rowling */
 SELECT l.* FROM livro l
