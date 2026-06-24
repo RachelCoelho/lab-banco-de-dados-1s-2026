@@ -331,7 +331,7 @@ SELECT nome_usuario, nome_autor, titulo, nome_categoria FROM (
     JOIN categoria t3 ON (t1.id_categoria = t3.id_categoria)
 ) AS busca_detalhada;
 
-/*Teste 2: Verificando o relatório geral corrigido*/
+/*Teste 2: Verificando o relatório geral*/
 SELECT * FROM vw_relatorio;
 
 /*Teste 3: Chama a procedure para atualizar os dados físicos*/
