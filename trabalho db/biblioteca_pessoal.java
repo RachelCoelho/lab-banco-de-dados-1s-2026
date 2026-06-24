@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS Cursos;
 CREATE DATABASE Cursos;
 USE Cursos;
 
