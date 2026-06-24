@@ -277,9 +277,9 @@ SELECT * FROM relatorio_rendimento;
 
 -- TESTE 5: Validação de Reatividade Dinâmica
 INSERT INTO Aluno(nome, email, dt_nascimento) VALUES ("Aluno Validador", "validador@gmail.com", "2000-01-01");
-DELETE FROM Aluno WHERE email = "validador@gmail.com";
 INSERT INTO Matricula(id_aluno, data_matricula, id_turma, nota) 
 VALUES ((SELECT id_aluno FROM Aluno WHERE email = "validador@gmail.com"), '2026-03-25', 4, 1.5);
+DELETE FROM Aluno WHERE email = "validador@gmail.com";
 
 SELECT * FROM vw_rendimento_curso WHERE curso = "Métodos Ágeis";
 CALL sp_gerar_snapshot_rendimento();
