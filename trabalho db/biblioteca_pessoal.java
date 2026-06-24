@@ -313,10 +313,10 @@ BEGIN
 END$$
 DELIMITER ;
 
--- Executa a procedure para alimentar a tabela relatório física
+/*Executa a procedure para alimentar a tabela relatório física*/
 CALL sp_atualizar_relatorio();
 
--- Verifica o resultado da tabela criada pela procedure
+/*Verifica o resultado da tabela criada pela procedure*/
 SELECT * FROM relatorio;
 
 /*TESTE*/
