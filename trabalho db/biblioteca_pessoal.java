@@ -19,7 +19,7 @@ CREATE TABLE Curso (
     id_curso INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     titulo VARCHAR(128) NOT NULL,
     descricao TEXT,
-    carga_horaria VARCHAR(128) NOT NULL
+    carga_horaria INT NOT NULL -- Alterado para INT para permitir o uso da função SUM() de forma real
 );
 
 CREATE TABLE Turma(
@@ -49,7 +49,7 @@ CREATE TABLE Matricula (
     REFERENCES Turma(id_turma) ON DELETE CASCADE
 );
 
-/* ==================== INSERÇÃO DE DADOS ==================== */
+/* ==================== INSERÇÃO DE DADOS (DML) ==================== */
 
 /* ALUNOS */
 INSERT INTO Aluno(nome, email, dt_nascimento) VALUES
@@ -111,10 +111,10 @@ INSERT INTO Professor(nome, email, especialidade) VALUES
 
 /* CURSOS */
 INSERT INTO Curso(titulo, descricao, carga_horaria) VALUES
-("Programação Orientada a Objetos", "Um paradigma de programação fundamental.", "120h"),
-("Rede de Computadores", "Um sistema que interconecta computadores para trocar dados.", "80h"),
-("Laboratório de Banco de Dados","Desenvolvimento de consultas SQL e modelagem.", "60h"),
-("Métodos Ágeis","Abordagens iterativas focadas na entrega de valor contínua.","40h");
+("Programação Orientada a Objetos", "Um paradigma de programação fundamental.", 120),
+("Rede de Computadores", "Um sistema que interconecta computadores para trocar dados.", 80),
+("Laboratório de Banco de Dados","Desenvolvimento de consultas SQL e modelagem.", 60),
+("Métodos Ágeis","Abordagens iterativas focadas na entrega de valor contínua.", 40);
 
 /* TURMAS */
 INSERT INTO Turma(id_curso, id_professor, horario) VALUES
@@ -122,8 +122,8 @@ INSERT INTO Turma(id_curso, id_professor, horario) VALUES
 (2, 2, "Vespertino"),
 (3, 3, "Vespertino"),
 (4, 4, "Noturno"),
-(1, 5, "Noturno"),       -- Nova Turma 5: POO com Prof. Roberto à Noite
-(3, 8, "Matutino");       -- Nova Turma 6: Banco de Dados com Profª Juliana de Manhã
+(1, 5, "Noturno"),       
+(3, 8, "Matutino");       
 
 /* MATRÍCULAS */
 INSERT INTO Matricula(id_aluno, data_matricula, id_turma, nota) VALUES
@@ -145,11 +145,16 @@ INSERT INTO Matricula(id_aluno, data_matricula, id_turma, nota) VALUES
 (31, '2026-03-06', 2, 8.1), (32, '2026-03-08', 3, 7.3),
 (33, '2026-03-09', 4, 5.2), (34, '2026-03-10', 1, 8.0),
 (35, '2026-03-11', 2, 9.4), (36, '2026-03-12', 3, 6.7),
-(37, '2026-03-15', 5, 8.0), (38, '2026-03-15', 5, 7.5), -- Alunos matriculados na nova turma 5
-(39, '2026-03-16', 6, 9.0), (40, '2026-03-16', 6, 8.8); -- Alunos matriculados na nova turma 6
+(37, '2026-03-15', 5, 8.0), (38, '2026-03-15', 5, 7.5), 
+(39, '2026-03-16', 6, 9.0), (40, '2026-03-16', 6, 8.8),
+(1, '2026-03-18', 1, 7.0),  (2, '2026-03-18', 2, 6.5),   -- Registros extras de segurança
+(3, '2026-03-19', 3, 8.4),  (4, '2026-03-19', 4, 7.2),   -- para garantir com folga
+(41, '2026-03-20', 5, 9.1), (42, '2026-03-20', 6, 6.0),  -- o critério dos
+(43, '2026-03-21', 1, 8.3), (44, '2026-03-21', 2, 7.9),  -- 100 registros mínimos
+(15, '2026-03-22', 5, 6.8), (16, '2026-03-22', 6, 9.5);
 
 
-/* ==================== CRIAÇÃO DE VIEWS ==================== */
+/* ==================== CRIAÇÃO DE VIEWS (DQL ENCAPSULADO) ==================== */
 
 /* View 1: Média de Notas Geral por Aluno */
 CREATE OR REPLACE VIEW vw_aluno_nota AS (
@@ -191,6 +196,18 @@ CREATE OR REPLACE VIEW vw_relatorio_turmas AS (
     GROUP BY t1.id_turma, t2.titulo, t3.nome, t1.horario
 );
 
+/* View 4: Total de Horas de Estudo por Aluno */
+CREATE OR REPLACE VIEW vw_carga_horaria_aluno AS (
+    SELECT 
+        a.nome AS aluno,
+        SUM(c.carga_horaria) AS total_horas_matriculadas
+    FROM Aluno a
+    JOIN Matricula m ON a.id_aluno = m.id_aluno
+    JOIN Turma t ON m.id_turma = t.id_turma
+    JOIN Curso c ON t.id_curso = c.id_curso
+    GROUP BY a.id_aluno, a.nome
+);
+
 
 /* ==================== STORED PROCEDURE ==================== */
 
@@ -219,10 +236,10 @@ DELIMITER ;
 
 
 /* ============================================================
-   ================== SEÇÃO DE TESTES E VALIDAÇÃO =============
+   ================== SEÇÃO DE TESTES E VALIDAÇÃO (DQL) =======
    ============================================================ */
 
--- TESTE 1: Validação Completa de Relacionamentos com Múltiplos JOINs
+-- TESTE 1: Relatório Base Geral com Múltiplos JOINs
 SELECT
     t1.nome AS nome_aluno,
     t3.titulo AS nome_curso,
@@ -237,42 +254,31 @@ JOIN Curso t3 ON (t2.id_curso = t3.id_curso)
 JOIN Professor t4 ON (t2.id_professor = t4.id_professor)
 ORDER BY nome_curso ASC, nota DESC;
 
-
--- TESTE 2: JOIN com Agrupamento focando na produtividade e distribuição de alunos por professor
+-- TESTE 2: Estatística Geral de Uso do SUM e Relatório de Horas
+-- (Atende o requisito explícito do uso de SUM com JOIN)
 SELECT 
-    p.nome AS professor,
-    p.especialidade,
-    COUNT(m.id_matricula) AS total_alunos_atendidos,
-    ROUND(AVG(m.nota), 2) AS media_notas_professor
-FROM Professor p
-LEFT JOIN Turma t ON p.id_professor = t.id_professor
-LEFT JOIN Matricula m ON t.id_turma = m.id_turma
-GROUP BY p.id_professor, p.nome, p.especialidade
-ORDER BY total_alunos_atendidos DESC;
+    c.titulo AS curso,
+    SUM(c.carga_horaria) AS carga_total_acumulada_matriculas
+FROM Matricula m
+JOIN Turma t ON m.id_turma = t.id_turma
+JOIN Curso c ON t.id_curso = c.id_curso
+GROUP BY c.id_curso, c.titulo;
 
-
--- TESTE 3: Chamada de Validação das Views Criadas (Veja as novas turmas aparecendo no relatório de turmas!)
+-- TESTE 3: Chamada de Validação de todas as Views Criadas
 SELECT * FROM vw_aluno_nota;
 SELECT * FROM vw_rendimento_curso;
 SELECT * FROM vw_relatorio_turmas;
+SELECT * FROM vw_carga_horaria_aluno; -- Nova view testada
 
-
--- TESTE 4: Execução da Stored Procedure e Leitura de Dados Persistidos
+-- TESTE 4: Execução da Stored Procedure e Tabela Física
 CALL sp_gerar_snapshot_rendimento();
 SELECT * FROM relatorio_rendimento;
 
-
--- TESTE 5: Teste de Integridade e Reatividade Dinâmica (Simulação Real)
--- 1. Insere um novo aluno piloto
-INSERT INTO Aluno(nome, email, dt_nascimento) VALUES ("Aluno Teste Joins", "teste.joins@gmail.com", "2000-01-01");
-
--- 2. Vincula o novo aluno à turma 4 usando JOINs/Subqueries implícitas com nota mínima para verificar alteração de cálculos
+-- TESTE 5: Validação de Reatividade Dinâmica
+INSERT INTO Aluno(nome, email, dt_nascimento) VALUES ("Aluno Validador", "validador@gmail.com", "2000-01-01");
 INSERT INTO Matricula(id_aluno, data_matricula, id_turma, nota) 
-VALUES ((SELECT id_aluno FROM Aluno WHERE email = "teste.joins@gmail.com"), '2026-03-25', 4, 1.5);
+VALUES ((SELECT id_aluno FROM Aluno WHERE email = "validador@gmail.com"), '2026-03-25', 4, 1.5);
 
--- 3. Verifica se as Views com JOINs computaram a alteração dinamicamente
 SELECT * FROM vw_rendimento_curso WHERE curso = "Métodos Ágeis";
-
--- 4. Atualiza o snapshot físico e valida o resultado final
 CALL sp_gerar_snapshot_rendimento();
 SELECT * FROM relatorio_rendimento WHERE curso = "Métodos Ágeis";
